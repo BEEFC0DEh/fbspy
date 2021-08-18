@@ -39,13 +39,16 @@ void FbSpy::setRunning(bool running)
     if (m_running == running)
         return;
 
+    m_running = running;
+
     if (running) {
         captureFb();
     } else {
         releaseFb();
+        m_fbDataId = 0;
+        m_fbDataPosition = 0;
     }
 
-    m_running = running;
     emit runningChanged(m_running);
 }
 
