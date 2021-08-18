@@ -9,6 +9,7 @@ void FbSpy::setVirtualSize(const QSize &virtualSize)
     if (m_virtualSize == virtualSize)
         return;
 
+    m_fbData.resize(virtualSize.width() * virtualSize.height() * sizeof(int32_t));
     m_virtualSize = virtualSize;
     emit virtualSizeChanged(m_virtualSize);
 }
@@ -60,21 +61,34 @@ void FbSpy::appendStatus(const QString &status)
 
 int FbSpy::appendData(const QByteArray &data)
 {
-    int pos = m_tmpFbData.size();
-    m_tmpFbData += data;
-    emit partialDataChanged(m_fbDataId, pos, data.size());
+    int inputSize = data.size();
+    int fbDataSize = m_fbData.size();
+    if (m_fbDataPosition >= fbDataSize || inputSize == 0) {
+        return 0;
+    }
+
+    int delta = m_fbDataPosition + inputSize;
+    int bytesToCopy;
+    if (delta > fbDataSize) {
+        bytesToCopy = fbDataSize - m_fbDataPosition;
+    } else {
+        bytesToCopy = inputSize;
+    }
+
+    memcpy(&(m_fbData.data()[m_fbDataPosition]), data.constData(), bytesToCopy);
+    emit partialDataChanged(m_fbDataId, m_fbDataPosition, data.size());
+    m_fbDataPosition += inputSize;
     return data.size();
 }
 
 const QByteArray &FbSpy::data() const
 {
-    return m_tmpFbData;
+    return m_fbData;
 }
 
 void FbSpy::finalizeData()
 {
-//    m_fbData.swap(m_tmpFbData);
-    m_tmpFbData.clear();
+    m_fbDataPosition = 0;
     ++m_fbDataId;
     emit frameFinished();
 }

@@ -26,7 +26,9 @@ void FbFileSpy::captureFb()
 
         } else {
             const QStringList &size = QString::fromLatin1(fbSize.readAll()).split(',');
-            setVirtualSize(QSize(size.at(0).toInt(), size.at(1).toInt()));
+
+            // Reserve 1.5x height in case /dev/fb0 actually contains more data.
+            setVirtualSize(QSize(size.at(0).toInt(), size.at(1).toInt() * 1.5f));
             setFbCaptured(true);
             m_timer = startTimer(TIMER_INTERVAL);
         }

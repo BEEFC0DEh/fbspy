@@ -48,7 +48,6 @@ protected:
 private:
     const QByteArray &data() const;
 
-    QByteArray m_tmpFbData;
     QByteArray m_fbData;
     QString m_status;
     QSize m_virtualSize;
