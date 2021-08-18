@@ -7,9 +7,12 @@
 
 #include "fbview.h"
 
+static QElapsedTimer updateTimer;
+
 FbViewItem::FbViewItem(QQuickItem *parent)
     : QQuickPaintedItem(parent)
     , m_fbImage(textureSize(), QImage::Format_ARGB32)
+    , m_currentFbDataId(0)
     , m_fbView(new FbView(this))
 {
     setRenderTarget(QQuickPaintedItem::FramebufferObject);
@@ -22,27 +25,51 @@ FbViewItem::FbViewItem(QQuickItem *parent)
     });
 
     setTextureSize(QSize{1000, 1000});
+    updateTimer.start();
 }
 
-void FbViewItem::updateFbData()
+void FbViewItem::copyFbData(int start, int size)
 {
     QElapsedTimer timer;
     timer.start();
-    if (!m_fbView->spy()) {
+    int imageByteCount = m_fbImage.byteCount();
+    if (start >= imageByteCount || size == 0) {
         return;
     }
 
     const auto &data =  m_fbView->data();
+    int delta = start + size;
     int bytesToCopy;
-    if (data.size() > m_fbImage.byteCount()) {
-        bytesToCopy = m_fbImage.byteCount();
+    if (delta > imageByteCount) {
+        bytesToCopy = imageByteCount - start;
     } else {
-        bytesToCopy = data.size();
+        bytesToCopy = size;
     }
 
-    memcpy(m_fbImage.bits(), data.constData(), bytesToCopy);
+    memcpy(&(m_fbImage.bits()[start]), &(data.constData()[start]), bytesToCopy);
     qInfo() << "Copied" << bytesToCopy << "bytes to the texture.";
     qInfo() << "It took" << timer.elapsed() << "ms.";
+}
+
+void FbViewItem::updateFbData()
+{
+    if (!m_fbView->spy()) {
+        return;
+    }
+
+    copyFbData(0, m_fbView->data().size());
+    update();
+}
+
+void FbViewItem::updatePartialFbData(uint id, int position, int size)
+{
+    copyFbData(position, size);
+
+    if (updateTimer.elapsed() < 500) {
+        return;
+    }
+
+    updateTimer.restart();
     update();
 }
 

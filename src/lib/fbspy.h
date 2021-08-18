@@ -29,7 +29,8 @@ signals:
     void fbCapturedChanged(bool fbCaptured);
     void virtualSizeChanged(const QSize &virtualSize);
     void statusChanged(const QString &status);
-    void dataChanged();
+    void frameFinished();
+    void partialDataChanged(uint id, int position, int size);
 
 protected:
     virtual void captureFb() = 0;
@@ -51,6 +52,8 @@ private:
     QByteArray m_fbData;
     QString m_status;
     QSize m_virtualSize;
+    uint m_fbDataId = 0;
+    int  m_fbDataPosition = 0;
     bool m_running = false;
     bool m_fbCaptured = false;
 

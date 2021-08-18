@@ -26,7 +26,8 @@ void FbView::setSpy(FbSpy *spy)
     if(m_fbSpy) {
         connect(m_fbSpy, SIGNAL(statusChanged(const QString&)), parent(), SLOT(updateStatus(const QString&)));
         connect(m_fbSpy, SIGNAL(virtualSizeChanged(const QSize&)), parent(), SLOT(updateVirtualSize(const QSize&)));
-        connect(m_fbSpy, SIGNAL(dataChanged()), parent(), SLOT(updateFbData()));
+        connect(m_fbSpy, SIGNAL(frameFnished()), parent(), SLOT(finishFrame()));
+        connect(m_fbSpy, SIGNAL(partialDataChanged(uint, int, int)), parent(), SLOT(updatePartialFbData(uint, int, int)));
     }
 
     emit spyChanged(m_fbSpy);

@@ -60,20 +60,23 @@ void FbSpy::appendStatus(const QString &status)
 
 int FbSpy::appendData(const QByteArray &data)
 {
+    int pos = m_tmpFbData.size();
     m_tmpFbData += data;
+    emit partialDataChanged(m_fbDataId, pos, data.size());
     return data.size();
 }
 
 const QByteArray &FbSpy::data() const
 {
-    return m_fbData;
+    return m_tmpFbData;
 }
 
 void FbSpy::finalizeData()
 {
-    m_fbData.swap(m_tmpFbData);
+//    m_fbData.swap(m_tmpFbData);
     m_tmpFbData.clear();
-    emit dataChanged();
+    ++m_fbDataId;
+    emit frameFinished();
 }
 
 void FbSpy::setFbCaptured(bool fbCaptured)

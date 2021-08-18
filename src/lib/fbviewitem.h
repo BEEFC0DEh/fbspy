@@ -30,10 +30,14 @@ signals:
 
 private slots:
     void updateFbData();
+    void updatePartialFbData(uint id, int position, int size);
     void updateVirtualSize(const QSize&virtualSize);
 
 private:
+    void copyFbData(int start, int size);
+
     QImage m_fbImage;
+    uint   m_currentFbDataId;
     FbView *m_fbView;
 };
 
