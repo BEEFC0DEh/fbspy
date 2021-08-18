@@ -31,6 +31,20 @@ Window {
             }
         }
 
+//        FbSocketSpy {
+//            id: fbSpy
+
+//            address: "192.168.2.15"
+////            running: true
+
+//            onVirtualSizeChanged: {
+//                spinboxWidth.value = virtualSize.width
+//                spinboxHeight.value = virtualSize.height
+//            }
+
+//            Component.onCompleted: running = true
+//        }
+
         Flickable {
             anchors.fill: parent
             contentWidth: fbView.width * fbView.scale

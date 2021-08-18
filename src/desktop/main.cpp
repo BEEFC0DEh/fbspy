@@ -5,6 +5,7 @@
 #include "../lib/fbfilespy.h"
 #include "../lib/fbviewitem.h"
 #include "../lib/fbserver.h"
+#include "../lib/fbsocketspy.h"
 
 int main(int argc, char *argv[])
 {
@@ -12,6 +13,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<FbFileSpy>("FbSpy", 1, 0, "FbFileSpy");
     qmlRegisterType<FbViewItem>("FbSpy", 1, 0, "FbView");
     qmlRegisterType<FbServer>("FbSpy", 1, 0, "FbServer");
+    qmlRegisterType<FbSocketSpy>("FbSpy", 1, 0, "FbSocketSpy");
 
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 

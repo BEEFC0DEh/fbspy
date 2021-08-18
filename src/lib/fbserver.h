@@ -3,9 +3,12 @@
 
 #include <QObject>
 #include <QTcpServer>
+#include <QDataStream>
+#include <QFutureWatcher>
 #include "fbview.h"
 
 class QTcpSocket;
+//class QFutureWatcher;
 
 class FbServer : public QTcpServer
 {
@@ -25,9 +28,12 @@ signals:
 
 private slots:
     void updateFbData();
+    void updatePartialFbData(uint id, int position, int size);
 
 private:
+    QDataStream m_fbDataStream;
     QTcpSocket *m_fbSocket;
+    QFutureWatcher<int> *m_futureWatcher;
     FbView *m_fbView;
 };
 
