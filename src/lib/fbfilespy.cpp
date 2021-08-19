@@ -14,10 +14,16 @@ FbFileSpy::FbFileSpy(QObject *parent)
     m_fbFile->setFileName(QStringLiteral("/dev/fb0"));
 }
 
+FbFileSpy::~FbFileSpy()
+{
+    releaseFb();
+}
+
 void FbFileSpy::captureFb()
 {
     clearStatus();
 
+    qDebug() << m_fbFile->size();
     if (m_fbFile->open(QIODevice::ReadOnly)) {
         QFile fbSize(QStringLiteral("/sys/class/graphics/fb0/virtual_size"));
 
@@ -28,8 +34,9 @@ void FbFileSpy::captureFb()
             const QStringList &size = QString::fromLatin1(fbSize.readAll()).split(',');
 
             // Reserve 1.5x height in case /dev/fb0 actually contains more data.
-            setVirtualSize(QSize(size.at(0).toInt(), size.at(1).toInt() * 1.5f));
+            setVirtualSize(QSize(size.at(0).toInt(), size.at(1).toInt()/* * 1.5f*/));
             setFbCaptured(true);
+            m_fbMap = m_fbFile->map(0, data().size());
             m_timer = startTimer(TIMER_INTERVAL);
         }
     } else {
@@ -42,6 +49,8 @@ void FbFileSpy::captureFb()
 
 void FbFileSpy::releaseFb()
 {
+    m_fbFile->unmap(m_fbMap);
+    m_fbMap = nullptr;
     m_fbFile->close();
     killTimer(m_timer);
     setVirtualSize(QSize{});
@@ -58,12 +67,15 @@ void FbFileSpy::readFb()
     m_elapsedTimer.restart();
 
     if (m_fbFile->isOpen()) {
-        int bytesRead = appendData(m_fbFile->read(m_bytesToRead));
+        QByteArray bytes(reinterpret_cast<const char *>(&(m_fbMap[m_totalReadBytes])), m_bytesToRead);
+//        int bytesRead = appendData(m_fbFile->read(m_bytesToRead));
+        int bytesRead = appendData(bytes);
 //        qInfo() << "Read" << bytesRead << "bytes.";
         m_totalReadBytes += bytesRead;
         ++m_byteSamples;
-        if (bytesRead < m_bytesToRead) {
-            m_fbFile->close();
+        if (m_totalReadBytes >= data().size()) {
+//        if (bytesRead < m_bytesToRead) {
+//            m_fbFile->close();
 
             finalizeData();
 
@@ -76,9 +88,9 @@ void FbFileSpy::readFb()
             m_byteSamples = 0;
             m_timeSamples = 0;
 
-            if (!m_fbFile->open(QIODevice::ReadOnly)) {
-                releaseFb();
-            }
+//            if (!m_fbFile->open(QIODevice::ReadOnly)) {
+//                releaseFb();
+//            }
 
             return;
         }

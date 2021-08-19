@@ -18,7 +18,7 @@ protected:
 
 public:
     explicit FbFileSpy(QObject *parent = nullptr);
-
+    virtual  ~FbFileSpy() override;
 
 protected:
     virtual void captureFb() override;
@@ -34,6 +34,7 @@ private:
     int m_totalReadBytes = 0;
     int m_byteSamples = 0;
     qint64 m_bytesToRead = 640 * 1024;
+    uchar *m_fbMap = nullptr;
     QFile *m_fbFile;
 };
 

@@ -15,6 +15,7 @@ class FbSpy : public QObject
 
 public:
     explicit FbSpy(QObject *parent = nullptr);
+    virtual  ~FbSpy() {}
 
     bool running() const;
     bool fbCaptured() const;
@@ -44,9 +45,9 @@ protected:
 
     int appendData(const QByteArray &data);
     void finalizeData();
+    const QByteArray &data() const;
 
 private:
-    const QByteArray &data() const;
 
     QByteArray m_fbData;
     QString m_status;
